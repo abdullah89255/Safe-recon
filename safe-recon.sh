@@ -11,7 +11,7 @@
 #  - Passive tech fingerprinting (HTTP headers, meta tags, asset hints)
 #  - DNS inventory (A/AAAA/CNAME/TXT/MX/NS)
 #  - Subdomain discovery via subfinder (passive APIs)
-#  - Optional active scans via nmap, nikto, nuclei (off by default; rate-limited)
+#  - Optional active scans via nmap, nikto, nuclei (on by default; rate-limited)
 #  - Outputs to /out folder with TXT/CSV and HTML summary
 #
 # Dependencies (install on Kali: sudo apt install curl dnsutils jq whatweb subfinder nmap nikto nuclei):
@@ -19,24 +19,24 @@
 #  For wappalyzer: npm install -g wappalyzer
 #
 # Usage example:
-#  sudo ./safe-recon.sh --i-own-this -t testphp.vulnweb.com --active --with-nikto --with-nuclei
+#  sudo ./safe-recon.sh --i-own-this -t testphp.vulnweb.com
 #  echo -e "testphp.vulnweb.com\nsub.example.com" > targets.txt; sudo ./safe-recon.sh --i-own-this -l targets.txt
 #
 
 set -uo pipefail
 IFS=$'\n\t'
 
-VERSION="1.0.6"  # Bumped for syntax fix
+VERSION="1.0.7"  # Bumped for enabling active, nikto, and nuclei by default
 SCRIPT_NAME="safe-recon.sh"
 
 # ----- defaults -----
 OUTDIR=""
 TARGETS=()
 OWNERSHIP_CONFIRMED=false
-ACTIVE=false
+ACTIVE=true
 FULL_PORTS=false
-WITH_NIKTO=false
-WITH_NUCLEI=false
+WITH_NIKTO=true
+WITH_NUCLEI=true
 DELAY=0
 RATE_LIMIT_NUCLEI=5
 NMAP_TOP_PORTS=100
@@ -61,10 +61,10 @@ Output:
   -o, --out DIR             Output directory (default: ./out-YYYYmmdd-HHMMSS)
 
 Safety / scope controls:
-  --active                  Enable light active checks (nmap top ${NMAP_TOP_PORTS})
+  --active                  Enable light active checks (nmap top ${NMAP_TOP_PORTS}, enabled by default)
   --full-ports              With --active, scan all TCP ports (-p-)
-  --with-nikto              Include nikto (active HTTP checks)
-  --with-nuclei             Include nuclei (HTTP CVE templates), rate-limited
+  --with-nikto              Include nikto (active HTTP checks, enabled by default)
+  --with-nuclei             Include nuclei (HTTP CVE templates, enabled by default), rate-limited
   --delay SEC               Sleep between targets (default: 0)
 
 Other:
@@ -72,7 +72,7 @@ Other:
   -v, --version             Show version
 
 Notes:
-  - Passive mode by default. Active scans need explicit flags.
+  - Active mode enabled by default. Disable with explicit flags if needed.
   - For bug bounty: Ensure targets are in scope; respect rate limits.
   - Install dependencies: sudo apt install curl dnsutils jq whatweb subfinder nmap nikto nuclei
 USAGE
@@ -142,9 +142,12 @@ parse_args() {
         ;;
       -o|--out) ((i++)); OUTDIR="${argv[$i]}" ;;
       --active) ACTIVE=true ;;
+      --no-active) ACTIVE=false ;;
       --full-ports) FULL_PORTS=true ;;
       --with-nikto) WITH_NIKTO=true ;;
+      --no-nikto) WITH_NIKTO=false ;;
       --with-nuclei) WITH_NUCLEI=true ;;
+      --no-nuclei) WITH_NUCLEI=false ;;
       --delay) ((i++)); DELAY="${argv[$i]}" ;;
       -h|--help) usage; exit 0 ;;
       -v|--version) echo "$VERSION"; exit 0 ;;
