@@ -76,7 +76,7 @@ awk 'match($0, /src=\"([^\"]+\.(js|mjs))(\?[^\"]*)?\"/, a){print a[1]}' "$INDEX"
 # -------------------------------------------------------------
 log "Collecting JS URLs from Wayback…"
 if command -v waybackurls >/dev/null 2>&1; then
-  waybackurls "$DOMAIN" | grep -Ei '\\.m?js(\\?.*)?$' | sort -u > "$ROOT/js/js-urls.txt" || true
+  waybackurls "$DOMAIN" | grep "\.js" | sort -u > "$ROOT/js/js-urls.txt" || true
 else
   log "waybackurls not found — skipping archive collection"
   : > "$ROOT/js/js-urls.txt"
