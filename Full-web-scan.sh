@@ -33,7 +33,7 @@ nuclei -u $target -t technologies/ > nuclei_tech.txt
 # -------------------- Step 2: URL & Param Discovery --------------------
 echo "[*] Discovering URLs using waybackurls..."
 echo $target | waybackurls | uro | tee wayback.txt
-
+echo wayback.txt |  grep "\.js" | tee JS.txt
 echo "[*] Running gf for param-based endpoints..."
 gf xss wayback.txt > xss.txt
 gf sqli wayback.txt > sqli.txt
