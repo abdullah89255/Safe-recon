@@ -45,7 +45,7 @@ fi
 # Add BBOT if installed (for max subdomains)
 if [ "$BBOT_INSTALLED" = "yes" ]; then
     echo "🔍 Running BBOT for advanced passive enum (more results)..."
-    bbot -t "$DOMAIN" -f subdomain-enum -m all --yes --allow-deadly -o "$OUT_DIR/bbot.json" --json
+    bbot -t "$DOMAIN" -f subdomain-enum -m --yes --allow-deadly -o "$OUT_DIR/bbot.json" --json
     jq -r '.events[] | select(.type=="DNS_NAME" and .data | test("^.*\\.'"$DOMAIN"'$")) | .data' "$OUT_DIR/bbot.json" > "$OUT_DIR/bbot.txt"
 else
     echo "⚠️ BBOT not installed (pip install bbot), skipping for now. Install for better results!"
